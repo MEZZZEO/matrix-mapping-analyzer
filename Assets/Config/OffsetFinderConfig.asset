@@ -15,7 +15,10 @@ MonoBehaviour:
   ModelJsonPath: Assets/Data/model.json
   SpaceJsonPath: Assets/Data/space.json
   OutputJsonPath: Assets/Data/offsets.json
-  Tolerance: 0.0001
+  Tolerance: 0.01
   BatchSize: 50
   MaxThreads: 4
   MaxGroupsToVisualize: 10
+  EnableDiagnostics: 0
+  MaxCandidatesToDiagnose: 3
+  DiagnoseFoundOffsets: 0

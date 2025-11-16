@@ -19,10 +19,12 @@ namespace Services
     public class ParallelOffsetCalculator : IOffsetCalculator
     {
         private readonly int _batchSize;
+        private readonly int _maxDegreeOfParallelism;
 
         public ParallelOffsetCalculator(OffsetFinderConfig config)
         {
             _batchSize = config.BatchSize;
+            _maxDegreeOfParallelism = Mathf.Clamp(config.MaxThreads, 1, SystemInfo.processorCount);
         }
 
         public async UniTask<List<FoundOffset>> FindOffsetsAsync(Matrices model, Matrices space,
@@ -45,7 +47,7 @@ namespace Services
                 {
                     var localResults = new List<FoundOffset>();
 
-                    Parallel.For(batchStart, batchEnd, new ParallelOptions { CancellationToken = ct }, sIdx =>
+                    Parallel.For(batchStart, batchEnd, new ParallelOptions { CancellationToken = ct, MaxDegreeOfParallelism = _maxDegreeOfParallelism }, sIdx =>
                     {
                         var candidateOffset = space[sIdx].Original * firstModelInverse;
 

@@ -18,6 +18,9 @@ namespace Config
         [Range(10, 500)]
         public int BatchSize = 50;
 
+        [Range(1, 16)]
+        public int MaxThreads = 4;
+
         [Header("Визуализация")]
         [Range(1, 100)]
         public int MaxGroupsToVisualize = 10;
