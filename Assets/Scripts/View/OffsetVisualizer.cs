@@ -49,12 +49,6 @@ namespace View
                 _modelMatrices = await _loader.LoadAsync(_config.ModelJsonPath);
             }
 
-            if (_visualizationObjectPrefab == null)
-            {
-                Debug.LogError("Model prefab не назначен!");
-                return;
-            }
-
             var count = Mathf.Min(offsets.Count, _config.MaxGroupsToVisualize);
 
             for (int i = 0; i < count; i++)

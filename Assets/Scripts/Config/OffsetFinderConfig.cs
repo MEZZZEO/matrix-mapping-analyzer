@@ -17,12 +17,15 @@ namespace Config
         [Header("Производительность")]
         [Range(10, 500)]
         public int BatchSize = 50;
-        
-        [Range(1, 16)]
-        public int MaxThreads = 4;
 
         [Header("Визуализация")]
         [Range(1, 100)]
         public int MaxGroupsToVisualize = 10;
+
+        [Header("Диагностика")]
+        public bool EnableDiagnostics = false;
+        [Range(1, 20)]
+        public int MaxCandidatesToDiagnose = 3;
+        public bool DiagnoseFoundOffsets = true;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Config;
 using Model;
-using Presenters;
 using Services;
 using Services.Interfaces;
 using UnityEngine;
@@ -19,8 +18,7 @@ namespace Infrastructure
         {
             builder.RegisterInstance(_config);
 
-            builder.Register<OffsetFinderModel>(Lifetime.Singleton);
-
+            builder.Register<IOffsetFinderModel, OffsetFinderModel>(Lifetime.Singleton);
             builder.Register<IMatrixLoader, JsonMatrixLoader>(Lifetime.Singleton);
             builder.Register<IOffsetCalculator, ParallelOffsetCalculator>(Lifetime.Singleton);
             builder.Register<IResultExporter, JsonResultExporter>(Lifetime.Singleton);
@@ -32,7 +30,6 @@ namespace Infrastructure
             }
 
             builder.Register<OffsetFinderService>(Lifetime.Singleton);
-
             builder.RegisterComponentInHierarchy<OffsetFinderUIController>();
         }
     }

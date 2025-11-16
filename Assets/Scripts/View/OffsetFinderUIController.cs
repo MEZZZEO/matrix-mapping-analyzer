@@ -1,8 +1,8 @@
 ﻿using Core;
 using Cysharp.Threading.Tasks;
 using Model;
-using Presenters;
 using R3;
+using Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,7 +25,7 @@ namespace View
         [SerializeField] private Transform _resultsContainer;
         [SerializeField] private GameObject _resultItemPrefab;
 
-        [Inject] private OffsetFinderModel _model;
+        [Inject] private IOffsetFinderModel _model;
         [Inject] private OffsetFinderService _service;
 
         private readonly CompositeDisposable _disposables = new();

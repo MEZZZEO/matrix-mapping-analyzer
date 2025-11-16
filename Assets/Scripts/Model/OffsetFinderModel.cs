@@ -3,7 +3,7 @@ using R3;
 
 namespace Model
 {
-    public class OffsetFinderModel
+    public class OffsetFinderModel : IOffsetFinderModel
     {
         private readonly ReactiveProperty<int> _totalCandidates = new(0);
         private readonly ReactiveProperty<int> _processedCandidates = new(0);
@@ -13,6 +13,8 @@ namespace Model
 
         private readonly Subject<FoundOffset> _offsetFound = new();
         private readonly Subject<string> _statusMessage = new();
+
+        private bool _disposed;
 
         public ReadOnlyReactiveProperty<int> TotalCandidates => _totalCandidates;
         public ReadOnlyReactiveProperty<int> ProcessedCandidates => _processedCandidates;
@@ -43,6 +45,22 @@ namespace Model
             _foundOffsets.Value = 0;
             _isProcessing.Value = false;
             _elapsedTime.Value = 0f;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+
+            _totalCandidates?.Dispose();
+            _processedCandidates?.Dispose();
+            _foundOffsets?.Dispose();
+            _isProcessing?.Dispose();
+            _elapsedTime?.Dispose();
+
+            _offsetFound?.Dispose();
+            _statusMessage?.Dispose();
+
+            _disposed = true;
         }
     }
 }

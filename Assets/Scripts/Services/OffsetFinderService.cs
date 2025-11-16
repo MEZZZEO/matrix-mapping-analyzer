@@ -7,13 +7,14 @@ using Cysharp.Threading.Tasks;
 using Model;
 using Services.Interfaces;
 using UnityEngine;
+using Utils;
 using VContainer;
 
-namespace Presenters
+namespace Services
 {
-    public class OffsetFinderService
+    public class OffsetFinderService : IDisposable
     {
-        [Inject] private readonly OffsetFinderModel _model;
+        [Inject] private readonly IOffsetFinderModel _model;
         [Inject] private readonly IMatrixLoader _loader;
         [Inject] private readonly IOffsetCalculator _calculator;
         [Inject] private readonly IResultExporter _exporter;
@@ -35,20 +36,21 @@ namespace Presenters
             try
             {
                 _model.SendStatus("Загрузка model.json...");
-                var modelMatrices = await _loader.LoadAsync(_config.ModelJsonPath);
+                var digits = ToleranceUtils.DigitsFromTolerance(_config.Tolerance);
+                var modelMatrices = new Matrices(_config.ModelJsonPath, digits);
 
                 _model.SendStatus("Загрузка space.json...");
-                var spaceMatrices = await _loader.LoadAsync(_config.SpaceJsonPath);
+                var spaceMatrices = new Matrices(_config.SpaceJsonPath, digits);
 
                 _model.SendStatus("Валидация данных...");
-                Services.MatrixValidationUtils.LogMatrixStatistics("Model", modelMatrices, _config.Tolerance);
-                Services.MatrixValidationUtils.LogMatrixStatistics("Space", spaceMatrices, _config.Tolerance);
+                MatrixValidationUtils.LogMatrixSetStatistics("Model", modelMatrices, _config.Tolerance);
+                MatrixValidationUtils.LogMatrixSetStatistics("Space", spaceMatrices, _config.Tolerance);
                 
-                if (!Services.MatrixValidationUtils.QuickFeasibilityCheck(modelMatrices, spaceMatrices))
+                if (!MatrixValidationUtils.QuickFeasibilityCheck(modelMatrices, spaceMatrices, _config.Tolerance))
                 {
                     _model.SendStatus("Данные могут быть некорректными. Проверьте логи.");
                 }
-
+                
                 _model.SetTotalCandidates(spaceMatrices.Count);
                 _model.SendStatus("Поиск смещений матриц...");
 
@@ -62,6 +64,29 @@ namespace Presenters
                     _cts.Token,
                     _model.NotifyOffsetFound
                 );
+
+                if (_config.EnableDiagnostics)
+                {
+                    Debug.Log($"=== Диагностика кандидатов (не найденных смещений) ===");
+                    var maxDiag = Mathf.Min(_config.MaxCandidatesToDiagnose, spaceMatrices.Count);
+                    for (int i = 0; i < maxDiag; i++)
+                    {
+                        var candidateOffset = spaceMatrices[i].Original * modelMatrices[0].Original.inverse;
+                        MatrixValidationUtils.DiagnoseOffset($"cand[{i}]", candidateOffset, modelMatrices, spaceMatrices, _config.Tolerance, 5);
+                    }
+                }
+
+                if (_config.DiagnoseFoundOffsets && _lastResults.Count > 0)
+                {
+                    Debug.Log($"=== Диагностика найденных смещений ===");
+                    var maxToCheck = Mathf.Min(3, _lastResults.Count);
+                    for (int i = 0; i < maxToCheck; i++)
+                    {
+                        var foundOffset = _lastResults[i];
+                        MatrixValidationUtils.DiagnoseOffset($"found[{i}] (spaceIdx={foundOffset.SpaceIndex})", 
+                            foundOffset.Matrix, modelMatrices, spaceMatrices, _config.Tolerance, 3);
+                    }
+                }
 
                 _model.SendStatus($"Поиск завершён. Найдено: {_lastResults.Count}");
             }
@@ -109,6 +134,12 @@ namespace Presenters
             }
 
             await _exporter.ExportAsync(_config.OutputJsonPath, _lastResults);
+        }
+
+        public void Dispose()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
     }
 }

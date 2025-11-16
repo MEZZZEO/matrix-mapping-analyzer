@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using Core;
@@ -22,10 +23,7 @@ namespace Services
             var dataArray = JsonConvert.DeserializeObject<MatrixData[]>(json);
 
             var matrices = new List<Matrix4x4>(dataArray.Length);
-            foreach (var data in dataArray)
-            {
-                matrices.Add(data.ToMatrix4x4());
-            }
+            matrices.AddRange(dataArray.Select(data => data.ToMatrix4x4()));
 
             Debug.Log($"Загружено {matrices.Count} матриц из {path}");
             return matrices;

@@ -10,8 +10,8 @@ namespace Services.Interfaces
     public interface IOffsetCalculator
     {
         UniTask<List<FoundOffset>> FindOffsetsAsync(
-            List<Matrix4x4> model,
-            List<Matrix4x4> space,
+            Matrices model,
+            Matrices space,
             float tolerance,
             IProgress<int> progress,
             CancellationToken ct,

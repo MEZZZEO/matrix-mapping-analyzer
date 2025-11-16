@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Services
+namespace Utils
 {
     /// <summary>
     /// Утилита для сравнения чисел, векторов и матриц с учетом абсолютной и относительной толерантности.
@@ -77,6 +77,25 @@ namespace Services
                     return i;
             }
             return -1;
+        }
+
+        /// <summary>
+        /// Преобразует значение толерантности в количество знаков после запятой
+        /// </summary>
+        public static int DigitsFromTolerance(float tolerance)
+        {
+            if (tolerance <= 0f) return 6;
+            var d = Mathf.Clamp(Mathf.RoundToInt(-Mathf.Log10(tolerance)), 0, 6);
+            return d;
+        }
+
+        /// <summary>
+        /// Округляет значение до заданного количества знаков после запятой
+        /// </summary>
+        public static float RoundToDigits(float value, int digits)
+        {
+            float scale = Mathf.Pow(10f, digits);
+            return Mathf.Round(value * scale) / scale;
         }
     }
 }
