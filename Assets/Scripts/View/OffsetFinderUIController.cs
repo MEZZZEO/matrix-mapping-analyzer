@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Config;
+using Core;
 using Cysharp.Threading.Tasks;
 using Model;
 using R3;
@@ -27,6 +28,7 @@ namespace View
 
         [Inject] private IOffsetFinderModel _model;
         [Inject] private OffsetFinderService _service;
+        [Inject] private OffsetFinderConfig _config;
 
         private readonly CompositeDisposable _disposables = new();
 
@@ -81,8 +83,12 @@ namespace View
         private async UniTaskVoid OnFindClickedAsync()
         {
             ClearResults();
-            
-            await _service.FindOffsetsAsync();
+
+            var digits = Utils.ToleranceUtils.DigitsFromTolerance(_config.Tolerance);
+            var modelMatrices = new Matrices(_config.ModelJsonPath, digits);
+            var spaceMatrices = new Matrices(_config.SpaceJsonPath, digits);
+
+            await _service.FindOffsetsAsync(modelMatrices, spaceMatrices);
         }
 
         private void OnCancelClicked()

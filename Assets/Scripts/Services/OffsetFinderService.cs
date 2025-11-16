@@ -24,7 +24,7 @@ namespace Services
         private List<FoundOffset> _lastResults;
         private CancellationTokenSource _cts;
 
-        public async UniTask FindOffsetsAsync()
+        public async UniTask FindOffsetsAsync(Matrices modelMatrices, Matrices spaceMatrices)
         {
             _model.Reset();
             _cts?.Cancel();
@@ -35,13 +35,6 @@ namespace Services
 
             try
             {
-                _model.SendStatus("Загрузка model.json...");
-                var digits = ToleranceUtils.DigitsFromTolerance(_config.Tolerance);
-                var modelMatrices = new Matrices(_config.ModelJsonPath, digits);
-
-                _model.SendStatus("Загрузка space.json...");
-                var spaceMatrices = new Matrices(_config.SpaceJsonPath, digits);
-
                 _model.SendStatus("Валидация данных...");
                 MatrixValidationUtils.LogMatrixSetStatistics("Model", modelMatrices, _config.Tolerance);
                 MatrixValidationUtils.LogMatrixSetStatistics("Space", spaceMatrices, _config.Tolerance);
